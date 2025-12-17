@@ -4,6 +4,7 @@ function  [sw_prop,mag_prop] = ace_sw_mag_prop_simple(sw,mag)
 % adapted from sw_prop_simple.m by A. Kellerman Jan, 2014
 % ACE data read from real-time streams
 % I. Michaelis Jan, 2018
+% Modified by I. Johnson Dec, 2025
 
 fprintf('propagation of sw\n');
 
