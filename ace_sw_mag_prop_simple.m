@@ -12,8 +12,10 @@ if ~isempty(sw)
     stdate_sw=min(matlabd_sw);
     endate_sw=max(matlabd_sw);
 
+    matlabd_sw_orig = matlabd_sw; % Save original SW times for interpolation to MAG data later
+
     matlabd_mag = mag(:,1);
-    stdate_mag=min(matlabd_mag);
+    stdate_mag=min(matlabd_mag); 
     endate_mag=max(matlabd_mag);
 
     sw_qual = sw(:,3);
@@ -110,7 +112,12 @@ if ~isempty(sw)
         end
     end
 
-    newtime_smooth = matlabd_mag + shifted_time_smooth ./ 86400 ; 
+    % Interpolate shifted_time_smooth from SW times to MAG times
+    % This ensures array sizes match when applying propagation to MAG data
+    shifted_time_smooth_mag = interp1(matlabd_sw_orig, shifted_time_smooth, matlabd_mag, 'linear', 'extrap');
+    
+    newtime_smooth = matlabd_mag + shifted_time_smooth_mag ./ 86400 ;
+    
     okinx = find(newtime_smooth >= stdate_mag & newtime_smooth < endate_mag);
     if ~isempty(okinx)
         newtime_smooth = newtime_smooth(okinx);
