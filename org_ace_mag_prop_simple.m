@@ -114,7 +114,9 @@ if ~isempty(sw)
         end
     end
 
-    newtime_smooth = matlabd_mag + shifted_time_smooth ./ 86400 ; 
+    % Use the original shifted_time_smooth (before sw filtering) for mag data
+    newtime_smooth = matlabd_mag + shifted_time_smooth_orig ./ 86400 ; 
+
     okinx = find(newtime_smooth >= stdate_mag & newtime_smooth < endate_mag);
     if ~isempty(okinx)
         newtime_smooth = newtime_smooth(okinx);
