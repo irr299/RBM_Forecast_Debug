@@ -4,6 +4,7 @@ function  [sw_prop,mag_prop] = ace_sw_mag_prop_simple(sw,mag)
 % adapted from sw_prop_simple.m by A. Kellerman Jan, 2014
 % ACE data read from real-time streams
 % I. Michaelis Jan, 2018
+% Edited for data_assimilation_forecast
 
 fprintf('propagation of sw\n');
 
@@ -34,6 +35,9 @@ if ~isempty(sw)
     shifted_time = distance ./ vel; %seconds
     shifted_time_smooth = smoothn(shifted_time,3); %robust spline smoothing
 
+    % Save original shifted_time_smooth for mag data processing later
+    shifted_time_smooth_orig = shifted_time_smooth;
+    
     newtime_smooth = matlabd_sw + shifted_time_smooth ./ 86400 ; 
     okinx = find(newtime_smooth >= stdate_sw & newtime_smooth < endate_sw);
     if ~isempty(okinx)
