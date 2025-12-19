@@ -4,7 +4,7 @@ function  [sw_prop,mag_prop] = ace_sw_mag_prop_simple(sw,mag)
 % adapted from sw_prop_simple.m by A. Kellerman Jan, 2014
 % ACE data read from real-time streams
 % I. Michaelis Jan, 2018
-% Modified by I. Johnson Dec, 2025
+% Modified by I. Johnson Dec,19 2025, 2 PM added interpolation to mag timestamps to avoid array size mismatch
 
 fprintf('propagation of sw\n');
 
@@ -13,10 +13,8 @@ if ~isempty(sw)
     stdate_sw=min(matlabd_sw);
     endate_sw=max(matlabd_sw);
 
-    matlabd_sw_orig = matlabd_sw; % Save original SW times for interpolation to MAG data later
-
     matlabd_mag = mag(:,1);
-    stdate_mag=min(matlabd_mag); 
+    stdate_mag=min(matlabd_mag);
     endate_mag=max(matlabd_mag);
 
     sw_qual = sw(:,3);
@@ -36,6 +34,10 @@ if ~isempty(sw)
     distance = 1.5e6;
     shifted_time = distance ./ vel; %seconds
     shifted_time_smooth = smoothn(shifted_time,3); %robust spline smoothing
+    
+    % Save original shifted_time_smooth and timestamps for mag data processing later
+    shifted_time_smooth_orig = shifted_time_smooth;
+    matlabd_sw_orig = matlabd_sw;
 
     newtime_smooth = matlabd_sw + shifted_time_smooth ./ 86400 ; 
     okinx = find(newtime_smooth >= stdate_sw & newtime_smooth < endate_sw);
@@ -113,11 +115,31 @@ if ~isempty(sw)
         end
     end
 
-    % Interpolate shifted_time_smooth from SW times to MAG times
-    % This ensures array sizes match when applying propagation to MAG data
-    shifted_time_smooth_mag = interp1(matlabd_sw_orig, shifted_time_smooth, matlabd_mag, 'linear', 'extrap');
+    % Interpolate shifted_time_smooth to mag timestamps
+    % Use the original shifted_time_smooth (before sw filtering) for mag data
+    % Filter out NaN and Inf values for robust interpolation
+    valid_idx = ~isnan(shifted_time_smooth_orig) & ~isinf(shifted_time_smooth_orig) & ~isnan(matlabd_sw_orig);
     
-    newtime_smooth = matlabd_mag + shifted_time_smooth_mag ./ 86400 ;
+    if sum(valid_idx) >= 3  % Need at least 3 points for interpolation
+        % Use nearest extrapolation (safer than linear for out-of-range values)
+        shifted_time_smooth_mag = interp1(matlabd_sw_orig(valid_idx), ...
+            shifted_time_smooth_orig(valid_idx), matlabd_mag, 'linear', 'extrap');
+        % Fill any NaN from extrapolation with nearest valid value
+        if any(isnan(shifted_time_smooth_mag))
+            shifted_time_smooth_mag = fillmissing(shifted_time_smooth_mag, 'nearest');
+        end
+    else
+        % Fallback: use median propagation time if insufficient valid data
+        median_shift = median(shifted_time_smooth_orig(valid_idx), 'omitnan');
+        if isnan(median_shift)
+            % If no valid data at all, use typical propagation time (~3600 sec for 400 km/s)
+            median_shift = 3600;
+            fprintf('Warning: No valid SW propagation data, using typical value (3600 sec)\n');
+        end
+        shifted_time_smooth_mag = median_shift * ones(size(matlabd_mag));
+    end
+    
+    newtime_smooth = matlabd_mag + shifted_time_smooth_mag ./ 86400 ; 
     
     okinx = find(newtime_smooth >= stdate_mag & newtime_smooth < endate_mag);
     if ~isempty(okinx)
