@@ -6,11 +6,12 @@ UTCSTR=$(date -u +%Y%m%dT%H0000)
 # create long movie 02:00 minutes
 # Using ffmpeg instead of mencoder to avoid B-frame corruption issues
 LD_PRELOAD=''
-# Create sorted file list, only including files that actually exist
+# Create sorted file list, only including files that actually exist and are non-empty
 FRAME_LIST_FILE=/tmp/frame_list_$$.txt
 rm -f "$FRAME_LIST_FILE"
 for f in $(find frames_movie -name "Forecast_E_1_MeV_PA_50*.png" -type f | sort -V); do
-    if [ -f "$f" ]; then
+    # Check that file exists, is readable, and has non-zero size
+    if [ -f "$f" ] && [ -r "$f" ] && [ -s "$f" ]; then
         echo "file '$(pwd)/$f'" >> "$FRAME_LIST_FILE"
         echo "duration 0.033333" >> "$FRAME_LIST_FILE"
     fi
