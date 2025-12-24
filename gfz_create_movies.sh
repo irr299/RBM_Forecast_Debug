@@ -12,9 +12,11 @@ rm -f "$FRAME_LIST_FILE"
 for f in $(find frames_movie -name "Forecast_E_1_MeV_PA_50*.png" -type f | sort -V); do
     if [ -f "$f" ]; then
         echo "file '$(pwd)/$f'" >> "$FRAME_LIST_FILE"
+        echo "duration 0.033333" >> "$FRAME_LIST_FILE"
     fi
 done
-/usr/bin/ffmpeg -y -f concat -safe 0 -i "$FRAME_LIST_FILE" -r 30 -vf "scale=1920:1080:flags=lanczos" -c:v libx264 -preset medium -crf 23 -pix_fmt yuv420p -movflags +faststart -bf 0 Forecast_UTC_E_1_MeV_PA_50_latest_scatter_smooth.mp4
+# Use concat demuxer with explicit duration per frame (1/30 second = 0.033333)
+/usr/bin/ffmpeg -y -f concat -safe 0 -i "$FRAME_LIST_FILE" -vf "scale=1920:1080:flags=lanczos" -c:v libx264 -preset medium -crf 23 -pix_fmt yuv420p -r 30 -movflags +faststart -bf 0 Forecast_UTC_E_1_MeV_PA_50_latest_scatter_smooth.mp4
 rm -f "$FRAME_LIST_FILE"
 #source $FC_HOME/setup_forecast_output.sh
 
