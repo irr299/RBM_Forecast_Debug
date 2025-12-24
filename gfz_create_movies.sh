@@ -6,11 +6,15 @@ UTCSTR=$(date -u +%Y%m%dT%H0000)
 # create long movie 02:00 minutes
 # Using ffmpeg instead of mencoder to avoid B-frame corruption issues
 LD_PRELOAD=''
-# Create sorted file list to ensure frames are processed in correct order
-
+# Create sorted file list, only including files that actually exist
 FRAME_LIST_FILE=/tmp/frame_list_$$.txt
-ls frames_movie/Forecast_E_1_MeV_PA_50*.png | sort -V | while read f; do echo "file '$(pwd)/$f'"; done > "$FRAME_LIST_FILE"
-/usr/bin/ffmpeg -y -framerate 30 -f concat -safe 0 -i "$FRAME_LIST_FILE" -vf "scale=1920:1080:flags=lanczos" -c:v libx264 -preset medium -crf 23 -pix_fmt yuv420p -movflags +faststart -bf 0 Forecast_UTC_E_1_MeV_PA_50_latest_scatter_smooth.mp4
+rm -f "$FRAME_LIST_FILE"
+for f in $(find frames_movie -name "Forecast_E_1_MeV_PA_50*.png" -type f | sort -V); do
+    if [ -f "$f" ]; then
+        echo "file '$(pwd)/$f'" >> "$FRAME_LIST_FILE"
+    fi
+done
+/usr/bin/ffmpeg -y -f concat -safe 0 -i "$FRAME_LIST_FILE" -r 30 -vf "scale=1920:1080:flags=lanczos" -c:v libx264 -preset medium -crf 23 -pix_fmt yuv420p -movflags +faststart -bf 0 Forecast_UTC_E_1_MeV_PA_50_latest_scatter_smooth.mp4
 rm -f "$FRAME_LIST_FILE"
 #source $FC_HOME/setup_forecast_output.sh
 
