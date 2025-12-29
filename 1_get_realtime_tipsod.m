@@ -1,6 +1,7 @@
 %%
 %
 % Written by Ingo Michaelis, Jan 2018
+% FIXED by I Johnson, Dec 2025 - Updated for new SSCWeb HTML format for GOES
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [x, y, z]=get_realtime_tipsod(matlabd,sat,coords)
@@ -250,47 +251,83 @@ function [x, y, z]=get_realtime_tipsod(matlabd,sat,coords)
     options = weboptions('Timeout',60);
     res=webread(url_cgi,options);
 %     res=webread(url_cgi);
-    lines=splitlines(res);
+
+% NEW PARSING LOGIC - Works with current SSCWeb format
+lines=splitlines(res);
+
+% Find <pre> tag (data section start)
+index_pre_start = 0;
+for i=1:size(lines,1)
+    if contains(lines{i}, '<pre>')
+        index_pre_start = i;
+        break;
+    end
+end
+
+% Find </pre></pre> tag (data section end)
+index_end_data = 0;
+for i=index_pre_start:size(lines,1)
+    if strcmp(lines{i}, '</pre></pre>')
+        index_end_data = i;
+        break;
+    end
+end
+
+% Extract data section (skip header lines)
+if index_pre_start > 0 && index_end_data > 0
+    % Skip first line after <pre> (might be header)
+    data_start = index_pre_start + 1;
     
-    index_sat=0;
-    i=1;
-    while i<=size(lines,1)
-        if strcmp(lines(i,1),sat)
-            index_sat=i;
-            i=i+1;
-        elseif strcmp(lines(i,1),'</pre></pre>')
-            index_end_data=i;
-            i=i+1;
-        else
-            i=i+1;
+    % Look for first line with coordinate data (YYYY DDD HH:MM format)
+    for i=data_start:index_end_data
+        if ~isempty(regexp(lines{i}, '^\s*\d{4}\s+\d{1,3}\s+\d{2}:\d{2}'))
+            data_start = i;
+            break;
         end
     end
     
-    if index_sat>0
-        data_header=lines(index_sat+2,1);
-        data_header=data_header{1,1};
-        data_header=strsplit(strtrim(data_header));
-        raw_data=lines((index_sat+4):(index_end_data-1),1);
-
-        data=zeros(size(raw_data,1),6);
-        for i=1:size(raw_data,1)
-            line=raw_data(i,1);
-            line=line{1,1};
-            line=strsplit(strtrim(line));
-            data(i,1)=datenum(sprintf('%s %s',line{1,1},line{1,2}),'yy/mm/dd HH:MM:SS');
-            data(i,2)=str2num(line{1,3});
-            data(i,3)=str2num(line{1,4});
-            data(i,4)=str2num(line{1,5});
+    raw_data = lines(data_start:(index_end_data-1));
+    
+    % Extract coordinates from each line
+    data = zeros(length(raw_data), 4);
+    valid_count = 0;
+    
+    for i=1:length(raw_data)
+        line = char(raw_data(i));
+        % Parse: YYYY DDD HH:MM  X  Y  Z
+        tokens = sscanf(line, '%d %d %d:%d %f %f %f');
+        if length(tokens) >= 7
+            valid_count = valid_count + 1;
+            % Convert to MATLAB datenum
+            year = tokens(1);
+            doy = tokens(2);
+            hour = tokens(3);
+            minute = tokens(4);
+            data(valid_count, 1) = datenum(year, 1, 1) + doy - 1 + hour/24 + minute/1440;
+            data(valid_count, 2) = tokens(5);  % X
+            data(valid_count, 3) = tokens(6);  % Y
+            data(valid_count, 4) = tokens(7);  % Z
         end
-
-        x=interp1(data(:,1),data(:,2),matlabd,'spline');
-        y=interp1(data(:,1),data(:,3),matlabd,'spline');
-        z=interp1(data(:,1),data(:,4),matlabd,'spline');
+    end
+    
+    % Trim to valid data
+    data = data(1:valid_count, :);
+    
+    % Interpolate to requested times
+    if valid_count > 0
+        x = interp1(data(:,1), data(:,2), matlabd, 'spline');
+        y = interp1(data(:,1), data(:,3), matlabd, 'spline');
+        z = interp1(data(:,1), data(:,4), matlabd, 'spline');
     else
-        x=[];
-        y=[];
-        z=[];
+        x = [];
+        y = [];
+        z = [];
     end
+else
+    x = [];
+    y = [];
+    z = [];
+end
 
 %     hold on
 %     plot(matlabd,x,'r-');
