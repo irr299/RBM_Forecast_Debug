@@ -1,5 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Written by I. Michaelis (GFZ), Jan, 2020
+% Modified by: I. Johnson, Dec 30, 2025 - Added the IRBEM library loading inside the parfor loop
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clear all;
@@ -66,6 +67,13 @@ parpool(24);
 % all_forecast_data_utc = all_forecast_data.utc;
 parfor (step_idx = 1:n_steps, 24)
 % for step_idx = 1:n_steps
+    % CRITICAL: Load IRBEM library in each parallel worker
+    % The library must be loaded in each worker session for field line tracing to work
+    addpath([getenv('FC_HOME'),'/Functions/'])
+    addpath([getenv('FC_HOME'),'/FunctionsPlot/'])
+    addpath(getenv('FC_IRBEM_HOME'))
+    onera_desp_lib_load(getenv('FC_IRBEM'))
+    
     act_date = time_vec(step_idx);
     % get array index for forecast mat-file closest to plot date
     [M,all_index] = min(abs([all_forecast_data.utc]-act_date))
