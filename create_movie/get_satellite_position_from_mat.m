@@ -1,6 +1,7 @@
 %%
 %
 % Written by Ingo Michaelis, Jan 2020
+% Modified by: I. Johnson, Dec 30, 2025 - Updating to handle the Satellite name
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [x, y, z]=get_satellite_position_from_mat(matlabd,sat,coords,path)
@@ -14,7 +15,23 @@ function [x, y, z]=get_satellite_position_from_mat(matlabd,sat,coords,path)
     sel_files=[];
     sel_filedates=[];
     all_pos_data=[];
-    posFiles=dir([path,sat,'/*/*/',sat,'*.mat']);
+    
+    % Map logical satellite names to actual satellite directory names
+    % This handles the case where forecast code uses "goes_primary" but
+    % position files are in "goes18" directory
+    sat_map = struct('goes_primary', 'goes18', 'goes_secondary', 'goes16');
+    if isfield(sat_map, sat)
+        sat_dir = sat_map.(sat);
+    else
+        sat_dir = sat;
+    end
+    
+    % Search for position files - try both the mapped name and original name
+    posFiles=dir([path,sat_dir,'/*/*/',sat_dir,'*.mat']);
+    if isempty(posFiles) && ~strcmp(sat_dir, sat)
+        % Fallback: try with original satellite name
+        posFiles=dir([path,sat,'/*/*/',sat,'*.mat']);
+    end
     for i=1:length(posFiles)
         posFile=posFiles(i);
         dstr=strsplit(posFile.name,'-');
