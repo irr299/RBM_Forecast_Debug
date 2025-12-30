@@ -1,17 +1,47 @@
+# 3DDA Directory Overview - RBM Forecast System
+
+## Summary
+
+The **3DDA** (3D Data Assimilative) directory is the core operational forecast component of the **GFZ Radiation Belt Model** (RBM) forecast system. It implements a sophisticated data assimilation scheme combined with physics-based modeling using the VERB (Versatile Electron Radiation Belt) code to predict electron phase space density (PSD) in Earth's magnetosphere.
+
+**Location**: `/PAGER/WP6/RBM_Forecast/gfz_3d_data_assimilative_forecast/3DDA/`
+
+**Primary Function**: Generate 2.1-day forecasts of radiation belt electron flux by assimilating satellite observations and running forward predictions using the VERB physics model.
+
+---
+
+## System Architecture
+
+### Data Flow Overview
+
+```
+Satellite Data (GOES, Van Allen Probes) + Kp Index
+            ↓
+    [Data Assimilation Phase]
+            ↓
+    Updated Phase Space Density (PSD)
+            ↓
+    [VERB Physics Model - Forecast Phase]
+            ↓
+    2.1-Day Forecast Output
+            ↓
+    Visualization & Products
+```
+
 ### 1. Operational Runner Scripts
 
 These are the primary entry points for different forecast operations:
 
-#### **run_forecast_cleaned.m** ⭐ [Operational]
+#### **run_forecast_cleaned.m** !! [Operational]
 - **Purpose**: Main operational forecast script (simplified version)
-- **What it does**:
+- **Process**:
   - Loads settings from `settings_cleaned.m`
   - Runs a single forecast cycle from current UTC time
   - Calls `fc_loaddxx_DA3D_Neumann_cleaned.m` to perform computation
   - Saves output to Archive directory
 - **Key Variables**:
   - `specified_utc`: Time to run forecast from
-  - `fcopt.da_time`: Data assimilation window (e.g., 7 days)
+  - `fcopt.lda_time`: Data assimilation window (e.g., 7 days)
   - `fcopt.forecast_duration`: 2.1 days
 - **Output**: `PSD_fastforecast_YYYYMMDD_HHMMSS.mat`
 
