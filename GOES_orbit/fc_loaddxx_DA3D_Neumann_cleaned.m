@@ -1,4 +1,5 @@
 % data assimilative forecast code:
+% Modified by: I. Johnson, Dec 30, 2025 - Added GOES satellite auto-detection
 
 % runs VERB in one step mode with constant boundary conditions but assimilates data
 % on each of the three diffusion operations.
@@ -250,6 +251,10 @@ if ~fcopt.model_simulation_only
     arase_xep_data_dir = [getenv('FC_ARASE_XEP_REALTIME_PROCESSED_DATA_DIR')];
     poes_data_dir = [getenv('FC_POES_REALTIME_PROCESSED_DATA_DIR')];
 
+    % Automatically detect operational GOES satellites based on available position data
+    sat_position_dir = getenv('FC_SAT_POSITION_DIR');
+    [primary_sat_name, secondary_sat_name] = detect_operational_goes(sat_position_dir, utc);
+    
     nspc = 4;
     nt2 = length(simulation.time);
     simulation.obs_PSD = nan(nspc,nt2,fcopt.NL,fcopt.NE,fcopt.NA);
@@ -260,6 +265,14 @@ if ~fcopt.model_simulation_only
     goes_primary = load_goes_data(start_time,utc,goes_data_dir,'primary_flux_e_',fcopt.mfmtxt,fname);
     goes_secondary = load_goes_data(start_time,utc,goes_data_dir,'secondary_flux_e_',fcopt.mfmtxt,fname);
     
+    % Update satellite names to match the actual operational GOES satellites
+    % This ensures the orbit plotting can find the correct position files
+    if ~isempty(primary_sat_name)
+        goes_primary.sate = cellstr(repmat(primary_sat_name, size(goes_primary.sate, 1), 1));
+    end
+    if ~isempty(secondary_sat_name)
+        goes_secondary.sate = cellstr(repmat(secondary_sat_name, size(goes_secondary.sate, 1), 1));
+    end
     % arase = load_arase_data(start_time,utc,arase_data_dir,'arase_hep_',fcopt.mfmtxt,fname);
     arase_xep = load_arase_xep_data(start_time,utc,arase_xep_data_dir,'Arase_n4_4_',fcopt.mfmtxt,fname);
 %     poes_m01 = load_poes_data_trapped(start_time,utc,poes_data_dir,'poes_m01_',fcopt.mfmtxt,fname)
