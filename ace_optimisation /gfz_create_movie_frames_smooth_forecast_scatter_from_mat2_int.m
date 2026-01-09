@@ -19,7 +19,7 @@ fc_days=2;
 simulationDir=[getenv('FC_MAT')];
 sel_files=[];
 sel_filedates=[];
-all_forecast_data=[]
+all_forecast_data=struct([]);  % Initialize as empty struct array
 simulationFiles=dir([simulationDir,'/*/','Forecast_',name_part,'_UTC_*.mat']);
 for i=1:length(simulationFiles)
     simulationFile=simulationFiles(i);
@@ -55,7 +55,12 @@ for i=1:length(simulationFiles)
             else
                 disp('No field mp_loc')
             end
-            all_forecast_data=[all_forecast_data tmp_forecast_data];
+            % Properly append to struct array
+            if isempty(all_forecast_data)
+                all_forecast_data = tmp_forecast_data;
+            else
+                all_forecast_data(end+1) = tmp_forecast_data;
+            end
         end
     end
 end
@@ -83,8 +88,13 @@ parfor (step_idx = 1:n_steps, 24)
     tic
     act_date = time_vec(step_idx);
     % get array index for forecast mat-file closest to plot date
-    [M,all_index] = min(abs([all_forecast_data.utc]-act_date))
-    forecast_data=all_forecast_data(all_index);
+    if ~isempty(all_forecast_data)
+        [M,all_index] = min(abs([all_forecast_data.utc]-act_date));
+        forecast_data=all_forecast_data(all_index);
+    else
+        fprintf('Warning: No forecast data available, skipping step %d\n', step_idx);
+        continue;
+    end
 %     forecast_data.times=forecast_data.times-((forecast_data.times(2)-forecast_data.times(1))/2);
     % get array index for actual time
     t_index=find(abs(forecast_data.times-forecast_data.utc)<1e-9);
