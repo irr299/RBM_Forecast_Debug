@@ -1,5 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Written by I. Michaelis (GFZ), 2019
+% Update by I. Johnson, Jan 09, 2026
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function  [sw,mag] = get_realtime_ace_sw_mag_from_mat(path_ace,matlabd,prop,time_start,time_end)
@@ -16,29 +17,47 @@ function  [sw,mag] = get_realtime_ace_sw_mag_from_mat(path_ace,matlabd,prop,time
     for day=time_start:time_end
         in_sw_file=strcat(path_ace,"swepam_1m/",datestr(datenum(day),'YYYYmm'),"/","ace_swepam_1m_",datestr(datenum(day),'YYYYmmdd'),".mat");
         fprintf('%s\n',in_sw_file);
-        if exist(in_sw_file)
-            data=load(in_sw_file);
-            in_sw.matlabd=cat(1,in_sw.matlabd,data.data.matlabd);
-            in_sw.jd=cat(1,in_sw.jd,data.data.jd);
-            in_sw.stat=cat(1,in_sw.stat,data.data.status);
-            in_sw.swn=cat(1,in_sw.swn,data.data.swn);
-            in_sw.swv=cat(1,in_sw.swv,data.data.swv);
-            in_sw.swT=cat(1,in_sw.swT,data.data.swT);
+        if exist(in_sw_file, 'file')
+            try
+                data=load(in_sw_file);
+                % Check if data structure is valid
+                if isfield(data, 'data') && isfield(data.data, 'matlabd') && ~isempty(data.data.matlabd)
+                    in_sw.matlabd=cat(1,in_sw.matlabd,data.data.matlabd);
+                    in_sw.jd=cat(1,in_sw.jd,data.data.jd);
+                    in_sw.stat=cat(1,in_sw.stat,data.data.status);
+                    in_sw.swn=cat(1,in_sw.swn,data.data.swn);
+                    in_sw.swv=cat(1,in_sw.swv,data.data.swv);
+                    in_sw.swT=cat(1,in_sw.swT,data.data.swT);
+                else
+                    fprintf('Warning: File %s exists but has invalid structure, skipping.\n', in_sw_file);
+                end
+            catch ME
+                fprintf('Warning: Error loading file %s: %s\n', in_sw_file, ME.message);
+            end
         end
 
         in_mag_file=strcat(path_ace,"/mag_1m/",datestr(datenum(day),'YYYYmm'),"/","ace_mag_1m_",datestr(datenum(day),'YYYYmmdd'),".mat");
         fprintf('%s\n',in_mag_file);
-        if exist(in_sw_file)
-            data=load(in_mag_file);
-            in_mag.matlabd=cat(1,in_mag.matlabd,data.data.matlabd);
-            in_mag.jd=cat(1,in_mag.jd,data.data.jd);
-            in_mag.stat=cat(1,in_mag.stat,data.data.status);
-            in_mag.bx=cat(1,in_mag.bx,data.data.bx);
-            in_mag.by=cat(1,in_mag.by,data.data.by);
-            in_mag.bz=cat(1,in_mag.bz,data.data.bz);
-            in_mag.bt=cat(1,in_mag.bt,data.data.bt);
-            in_mag.lat=cat(1,in_mag.lat,data.data.lat);
-            in_mag.lon=cat(1,in_mag.lon,data.data.lon);
+        if exist(in_mag_file, 'file')
+            try
+                data=load(in_mag_file);
+                % Check if data structure is valid
+                if isfield(data, 'data') && isfield(data.data, 'matlabd') && ~isempty(data.data.matlabd)
+                    in_mag.matlabd=cat(1,in_mag.matlabd,data.data.matlabd);
+                    in_mag.jd=cat(1,in_mag.jd,data.data.jd);
+                    in_mag.stat=cat(1,in_mag.stat,data.data.status);
+                    in_mag.bx=cat(1,in_mag.bx,data.data.bx);
+                    in_mag.by=cat(1,in_mag.by,data.data.by);
+                    in_mag.bz=cat(1,in_mag.bz,data.data.bz);
+                    in_mag.bt=cat(1,in_mag.bt,data.data.bt);
+                    in_mag.lat=cat(1,in_mag.lat,data.data.lat);
+                    in_mag.lon=cat(1,in_mag.lon,data.data.lon);
+                else
+                    fprintf('Warning: File %s exists but has invalid structure, skipping.\n', in_mag_file);
+                end
+            catch ME
+                fprintf('Warning: Error loading file %s: %s\n', in_mag_file, ME.message);
+            end
         end
     end
     
