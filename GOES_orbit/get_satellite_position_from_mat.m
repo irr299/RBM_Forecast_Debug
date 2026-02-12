@@ -19,15 +19,41 @@ function [x, y, z]=get_satellite_position_from_mat(matlabd,sat,coords,path)
     % Map logical satellite names to actual satellite directory names
     % This handles the case where forecast code uses "goes_primary" but
     % position files are in "goes18" directory
+    % Also handles generic "goes" name by trying available GOES satellites
     sat_map = struct('goes_primary', 'goes18', 'goes_secondary', 'goes16');
+    
+    % Initialize sat_dir and sat_file_pattern
+    sat_dir = sat;
+    sat_file_pattern = sat;  % Pattern to match in filenames
+    
     if isfield(sat_map, sat)
         sat_dir = sat_map.(sat);
-    else
-        sat_dir = sat;
+        sat_file_pattern = sat_dir;  % Use mapped name for file pattern too
     end
     
-    % Search for position files - try both the mapped name and original name
-    posFiles=dir([path,sat_dir,'/*/*/',sat_dir,'*.mat']);
+    % Special handling for generic "goes" name - try goes18 first (primary), then goes16
+    if strcmp(sat, 'goes')
+        % Try goes18 first (GOES-West, primary)
+        test_files = dir([path,'goes18/*/*/goes18*.mat']);
+        if ~isempty(test_files)
+            sat_dir = 'goes18';
+            sat_file_pattern = 'goes18';
+            fprintf('Mapping generic "goes" to goes18\n');
+        else
+            % Fallback to goes16 if goes18 not available
+            test_files = dir([path,'goes16/*/*/goes16*.mat']);
+            if ~isempty(test_files)
+                sat_dir = 'goes16';
+                sat_file_pattern = 'goes16';
+                fprintf('Mapping generic "goes" to goes16\n');
+            else
+                fprintf('Warning: No GOES satellite data found, keeping generic "goes"\n');
+            end
+        end
+    end
+    
+    % Search for position files using the file pattern (which may differ from directory name)
+    posFiles=dir([path,sat_dir,'/*/*/',sat_file_pattern,'*.mat']);
     if isempty(posFiles) && ~strcmp(sat_dir, sat)
         % Fallback: try with original satellite name
         posFiles=dir([path,sat,'/*/*/',sat,'*.mat']);
