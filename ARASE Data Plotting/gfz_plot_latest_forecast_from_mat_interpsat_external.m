@@ -43,37 +43,12 @@ set(fig3, 'visible', 'on')
 % set current figure without putting it to foreground
 set(groot, 'currentfigure', fig3);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fprintf('plot data\n');
-% plot real-time data
-% sat_names='';
-% forecast_data.sat_names=unique(forecast_data.sat_names);
-% for i=1:size(forecast_data.sat_names,1)
-%     if isfield(forecast_data,'sat_energies')
-% %         sat_names=[sat_names sprintf('%s (%.2f MeV)',upper(forecast_data.sat_names{i,1}),forecast_data.sat_energies(i))];
-%         sat_names=[sat_names sprintf('%s',upper(forecast_data.sat_names{i,1}))];
-%     else
-%         sat_names=[sat_names sprintf('%s',upper(forecast_data.sat_names{i,1}))];
-%     end
-%     if i<size(forecast_data.sat_names,1)
-%         sat_names=[sat_names ', '];
-%     end
-% 
-% end
-% cells=[1,2];
-% time_range=[min(forecast_data.times),max(forecast_data.times)];
-% [ax_real,ax_real_color]=gfz_plot_panel_data(...
-%     nrow,ncol,cells,...
-%     forecast_data.utc,forecast_data.timesd,forecast_data.L_T89d,forecast_data.fluxd, ...
-%     time_range, ...
-%     sat_names, ...
-%     conf_panel_data);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fprintf('select available satellites\n');
-% plot real-time data
+% Build satellite names string
 sat_names='';
+forecast_data.sat_names=unique(forecast_data.sat_names);
 for i=1:size(forecast_data.sat_names,1)
-    if ~isempty(forecast_data.sat_energies)
-%                     sat_names=[sat_names sprintf('%s (%.2f MeV)',upper(forecast_data.sat_names{i,1}),forecast_data.sat_energies(i))];
+    if isfield(forecast_data,'sat_energies') && ~isempty(forecast_data.sat_energies)
         sat_names=[sat_names sprintf('%s',upper(forecast_data.sat_names{i,1}))];
     else
         sat_names=[sat_names sprintf('%s',upper(forecast_data.sat_names{i,1}))];
@@ -81,11 +56,21 @@ for i=1:size(forecast_data.sat_names,1)
     if i<size(forecast_data.sat_names,1)
         sat_names=[sat_names ', '];
     end
-
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+fprintf('plot raw satellite data points\n');
+% Plot real-time raw data as scatter points
+cells=[1,2];
+time_range=[min(forecast_data.times),max(forecast_data.times)];
+[ax_real,ax_real_color]=gfz_plot_panel_data(...
+    nrow,ncol,cells,...
+    forecast_data.utc,forecast_data.timesd,forecast_data.L_T89d,forecast_data.fluxd, ...
+    time_range, ...
+    sat_names, ...
+    conf_panel_data);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fprintf('plot interpolated data\n');
-cells=[1,3];
+cells=[3,4];
 % plot simulated data
 % PLOTTING, use pcolor as a default
 [ax_data]=gfz_plot_panel_interpdata( ...
@@ -97,7 +82,7 @@ cells=[1,3];
     conf_panel_sim);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fprintf('plot model\n');
-cells=[4,6];
+cells=[5,6];
 % plot simulated data
 % PLOTTING, use pcolor as a default
 [ax_sim]=gfz_plot_panel_sim( ...
