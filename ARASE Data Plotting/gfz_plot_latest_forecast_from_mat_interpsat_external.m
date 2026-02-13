@@ -43,6 +43,31 @@ set(fig3, 'visible', 'on')
 % set current figure without putting it to foreground
 set(groot, 'currentfigure', fig3);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+fprintf('plot data\n');
+% plot real-time data
+% sat_names='';
+% forecast_data.sat_names=unique(forecast_data.sat_names);
+% for i=1:size(forecast_data.sat_names,1)
+%     if isfield(forecast_data,'sat_energies')
+% %         sat_names=[sat_names sprintf('%s (%.2f MeV)',upper(forecast_data.sat_names{i,1}),forecast_data.sat_energies(i))];
+%         sat_names=[sat_names sprintf('%s',upper(forecast_data.sat_names{i,1}))];
+%     else
+%         sat_names=[sat_names sprintf('%s',upper(forecast_data.sat_names{i,1}))];
+%     end
+%     if i<size(forecast_data.sat_names,1)
+%         sat_names=[sat_names ', '];
+%     end
+% 
+% end
+% cells=[1,2];
+% time_range=[min(forecast_data.times),max(forecast_data.times)];
+% [ax_real,ax_real_color]=gfz_plot_panel_data(...
+%     nrow,ncol,cells,...
+%     forecast_data.utc,forecast_data.timesd,forecast_data.L_T89d,forecast_data.fluxd, ...
+%     time_range, ...
+%     sat_names, ...
+%     conf_panel_data);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fprintf('select available satellites\n');
 % Build satellite names string
 sat_names='';
