@@ -22,6 +22,9 @@ function [ax_sim]=gfz_plot_panel_sim(...
     end
     hold off
     caxis(conf.range.flux);
+    ax_sim_color=colorbar(ax_sim,'east','Color',conf.color.axes);
+    ax_sim_color.Label.String = {'Flux';'log_{10} J (#/cm^2.s.sr.keV)'};
+    ax_sim_color.FontSize=conf.scale.flux_colorbar;
     colormap(ax_sim,conf.color.cmap);
     %shading flat
     shading interp
