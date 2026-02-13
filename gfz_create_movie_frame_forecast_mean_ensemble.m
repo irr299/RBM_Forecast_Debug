@@ -19,7 +19,7 @@ fc_days=2;
 simulationDir=[getenv('FC_OUTPUT_ENSEMBLE_MAT')];
 sel_files=[];
 sel_filedates=[];
-all_forecast_data=[]
+all_forecast_data=struct([]);  % Initialize as empty struct array
 simulationFiles=dir([simulationDir,'/*/','Forecast_mean_ensemble_',name_part,'_UTC_*.mat']);
 for i=1:length(simulationFiles)
     simulationFile=simulationFiles(i);
@@ -48,7 +48,12 @@ for i=1:length(simulationFiles)
             if ~isfield(tmp_forecast_data,'sat_energies')
                 tmp_forecast_data.sat_energies=[];
             end
-            all_forecast_data=[all_forecast_data tmp_forecast_data];
+            % Properly append to struct array
+            if isempty(all_forecast_data)
+                all_forecast_data = tmp_forecast_data;
+            else
+                all_forecast_data(end+1) = tmp_forecast_data;
+            end
         end
     end
 end
@@ -74,11 +79,21 @@ parfor (step_idx = 1:n_steps, 24)
     addpath(getenv('FC_IRBEM_HOME'))
     onera_desp_lib_load(getenv('FC_IRBEM'))
     
+    % CRITICAL: Ensure FC_SAT_POSITION_DIR is set in each worker
+    % This is needed for satellite position retrieval in gfz_plot_object_sat
+    if isempty(getenv('FC_SAT_POSITION_DIR'))
+        setenv('FC_SAT_POSITION_DIR', '/PAGER/WP6/data/outputs/RBM_Forecast/realtime_stream/satellite_position_stream/');
+    end
+    
     act_date = time_vec(step_idx);
     % get array index for forecast mat-file closest to plot date
-    [M,all_index] = min(abs([all_forecast_data.utc]-act_date))
-    % keyboard;
-    forecast_data=all_forecast_data(all_index);
+    if ~isempty(all_forecast_data)
+        [M,all_index] = min(abs([all_forecast_data.utc]-act_date));
+        forecast_data=all_forecast_data(all_index);
+    else
+        fprintf('Warning: No forecast data available, skipping step %d\n', step_idx);
+        continue;
+    end
     % keyboard;
 %     forecast_data.times=forecast_data.times-((forecast_data.times(2)-forecast_data.times(1))/2);
     % get array index for actual time
