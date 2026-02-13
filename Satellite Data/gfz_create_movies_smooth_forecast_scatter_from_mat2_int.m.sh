@@ -85,6 +85,19 @@ parpool(24);
 % for act_date=start_date:dt:end_date
 % for act_date=start_date:dt:end_date
 parfor (step_idx = 1:n_steps, 24)
+    % CRITICAL: Load IRBEM library and set paths in each parallel worker
+    % The library must be loaded in each worker session for field line tracing to work
+    addpath([getenv('FC_HOME'),'/Functions/'])
+    addpath([getenv('FC_HOME'),'/FunctionsPlot/'])
+    addpath(getenv('FC_IRBEM_HOME'))
+    onera_desp_lib_load(getenv('FC_IRBEM'))
+    
+    % CRITICAL: Ensure FC_SAT_POSITION_DIR is set in each worker
+    % This is needed for satellite position retrieval in gfz_plot_object_sat
+    if isempty(getenv('FC_SAT_POSITION_DIR'))
+        setenv('FC_SAT_POSITION_DIR', '/PAGER/WP6/data/outputs/RBM_Forecast/realtime_stream/satellite_position_stream/');
+    end
+    
     tic
     act_date = time_vec(step_idx);
     % get array index for forecast mat-file closest to plot date
