@@ -1,6 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Written by I. Michaelis (GFZ), Jan, 2020
 % Updated by ; I. Johnson, Jan, 2026
+% Updated by ; I. Johnson, Feb, 2026
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clear all;
@@ -175,16 +176,10 @@ parfor (step_idx = 1:n_steps, 24)
             % plot real-time data
             sat_names='';
             for i=1:size(forecast_data.sat_names,1)
-%                 if ~isempty(forecast_data.sat_energies)
-% %                     sat_names=[sat_names sprintf('%s (%.2f MeV)',upper(forecast_data.sat_names{i,1}),forecast_data.sat_energies(i))];
-%                     sat_names=[sat_names sprintf('%s',upper(forecast_data.sat_names{i,1}))];
-%                 else
-%                     sat_names=[sat_names sprintf('%s',upper(forecast_data.sat_names{i,1}))];
-                % end
+                sat_names=[sat_names sprintf('%s',upper(forecast_data.sat_names{i,1}))];
                 if i<size(forecast_data.sat_names,1)
                     sat_names=[sat_names ', '];
                 end
-
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % fprintf('plot data\n');
