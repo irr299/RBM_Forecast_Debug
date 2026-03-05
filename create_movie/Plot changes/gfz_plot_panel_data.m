@@ -24,7 +24,7 @@ function [ax_real,ax_real_color]=gfz_plot_panel_data(...
     caxis(conf.range.flux);
     shading flat
     %shading interp
-    ax_real_color=colorbar(ax_real,'east','Color',conf.color.axes);
+    ax_real_color=colorbar(ax_real,'eastoutside','Color',conf.color.axes);
     ax_real_color.Label.String = {'Flux';'log_{10} J (#/cm^2.s.sr.keV)'};
     ax_real_color.FontSize=conf.scale.flux_colorbar;
     colormap(ax_real,conf.color.cmap);
