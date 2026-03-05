@@ -172,7 +172,8 @@ parfor (step_idx = 1:n_steps, 24)
 
             end
             cells=[2,4];
-            time_range=[min(forecast_data.times),max(forecast_data.times)];
+            % Rolling window: scroll x-axis with act_date so right panels animate
+            time_range=[act_date - da_days, act_date + fc_days];
             [ax_real,ax_real_color]=gfz_plot_panel_data(...
                 nrow,ncol,cells,...
                 forecast_data.utc,forecast_data.timesd,forecast_data.L_T89d,forecast_data.fluxd, ...
