@@ -28,6 +28,11 @@ function [ax_kp]=gfz_plot_panel_kp(...
     grid();
 
     set(ax_kp,'FontWeight','bold','linewidth',conf.scale.frame_width,'Color','black','layer','top');
+   
+    % invisible colorbar keeps axis width aligned with flux panels that use 'eastoutside'
+    cb_dummy = colorbar(ax_kp, 'eastoutside');
+    cb_dummy.Visible = 'off';
+
     set(ax_kp, 'LooseInset', get(ax_kp,'TightInset'));
     ax_kp.XLabel.Color=conf.color.axes;
     ax_kp.YLabel.Color=conf.color.axes;
