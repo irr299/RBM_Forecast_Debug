@@ -27,6 +27,10 @@ function [ax_real,ax_real_color]=gfz_plot_panel_data(...
     ax_real_color=colorbar(ax_real,'eastoutside','Color',conf.color.axes);
     ax_real_color.Label.String = {'Flux';'log_{10} J (#/cm^2.s.sr.keV)'};
     ax_real_color.FontSize=conf.scale.flux_colorbar;
+
+    ax_real_color.Ticks = 0:1:4;                                   % integer steps only
+    ax_real_color.Label.FontSize = conf.scale.flux_colorbar + 4;   % label larger than tick font
+
     colormap(ax_real,conf.color.cmap);
     xlim(time_range);
     datetick('x','keepticks','keeplimits');
