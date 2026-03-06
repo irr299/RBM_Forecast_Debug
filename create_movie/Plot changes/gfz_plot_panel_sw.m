@@ -44,10 +44,6 @@ function [ax_sw]=gfz_plot_panel_sw(...
         set(ax_sw,'xticklabel',[]);
         set(ax_sw,'FontWeight','bold','linewidth',conf.scale.frame_width,'Color','black','layer','top');
 
-        % invisible colorbar keeps axis width aligned with flux panels that use 'eastoutside'
-        cb_dummy = colorbar(ax_sw, 'eastoutside');
-        cb_dummy.Visible = 'off';
-
         set(ax_sw, 'LooseInset', get(ax_sw,'TightInset'));
         ax_sw.Box='on';
         set(ax_sw_title,'Color',conf.color.axes,'FontWeight','bold','FontSize',conf.scale.sw_yaxis);
