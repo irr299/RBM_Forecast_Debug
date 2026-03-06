@@ -212,6 +212,16 @@ parfor (step_idx = 1:n_steps, 24)
                 time_range, ...
                 conf_panel_kp);
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % Force SW and Kp inner plot areas to match the flux panel width
+            % so the now-line aligns across all panels.
+            pos_ref        = ax_sim.Position;
+            pos_sw         = ax_sw.Position;
+            pos_sw([1 3])  = pos_ref([1 3]);
+            ax_sw.Position = pos_sw;
+            pos_kp         = ax_kp.Position;
+            pos_kp([1 3])  = pos_ref([1 3]);
+            ax_kp.Position = pos_kp;
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             fprintf('plot title\n');
             a = axes;
             ax_title = title(strcat('Real-time Radiation Belt Forecast v2, ',datestr(act_date,' HH:MM, mmm dd, yyyy'),' UTC'));
