@@ -25,6 +25,10 @@ function [ax_sim]=gfz_plot_panel_sim(...
     ax_sim_color=colorbar(ax_sim,'eastoutside','Color',conf.color.axes);
     ax_sim_color.Label.String = {'Flux';'log_{10} J (#/cm^2.s.sr.keV)'};
     ax_sim_color.FontSize=conf.scale.flux_colorbar;
+
+    ax_sim_color.Ticks = 0:1:4;                                  % integer steps only
+    ax_sim_color.Label.FontSize = conf.scale.flux_colorbar + 4;  % label larger than tick font
+
     colormap(ax_sim,conf.color.cmap);
     %shading flat
     shading interp
