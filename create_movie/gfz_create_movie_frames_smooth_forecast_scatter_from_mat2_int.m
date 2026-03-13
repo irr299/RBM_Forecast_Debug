@@ -185,8 +185,15 @@ parfor (step_idx = 1:n_steps, 24)
             % fprintf('plot data\n');
             % plot real-time data
             cells=[2,4];
+
+            %Uncomment this for rolling window
             % Rolling window: scroll x-axis with act_date so right panels animate
-            time_range=[act_date - da_days, act_date + fc_days];
+            %time_range=[act_date - da_days, act_date + fc_days]; 
+
+            % Static x-axis: now-line animates across fixed time range
+            time_range=[end_date - da_days, end_date + fc_days];
+
+
             forecast_data.timesd = forecast_data.timesd(1:4:end);
             forecast_data.L_T89d = forecast_data.L_T89d(1:4:end);
             forecast_data.fluxd = forecast_data.fluxd(1:4:end, :); 
