@@ -93,6 +93,18 @@ cells=6;
     time_range, ...
     conf_panel_kp);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Force SW and Kp inner plot areas to match the flux panel width so that
+% the now-line aligns across all panels.  ax_sim uses 'eastoutside' colorbar
+% which is the correct reference width; yyaxis right label in ax_sw would
+% otherwise push that panel's plot area to a different horizontal position.
+pos_ref        = ax_sim.Position;
+pos_sw         = ax_sw.Position;
+pos_sw([1 3])  = pos_ref([1 3]);
+ax_sw.Position = pos_sw;
+pos_kp         = ax_kp.Position;
+pos_kp([1 3])  = pos_ref([1 3]);
+ax_kp.Position = pos_kp;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fprintf('plot title\n');
 a = axes;
 ax_title = title(strcat('Real-time Radiation Belt Forecast v2, ',datestr(forecast_data.utc,' HH:MM, mmm dd, yyyy'),' UTC'));
